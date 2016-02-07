@@ -5,10 +5,12 @@ using Random = UnityEngine.Random;
 
 namespace Game.Characters
 {
+    [RequireComponent(typeof (PlayerSyncPosition))]
     [RequireComponent(typeof (CharacterController))]
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
+
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -32,6 +34,7 @@ namespace Game.Characters
         private float m_YRotation;
         private Vector2 m_Input;
         private Vector3 m_MoveDir = Vector3.zero;
+        private PlayerSyncPosition syncInput;
         private CharacterController m_CharacterController;
         private CollisionFlags m_CollisionFlags;
         private bool m_PreviouslyGrounded;
@@ -44,8 +47,9 @@ namespace Game.Characters
         // Use this for initialization
         private void Start()
         {
+            syncInput = GetComponent<PlayerSyncPosition>();
             m_CharacterController = GetComponent<CharacterController>();
-            m_Camera = Camera.main;
+            m_Camera = GetComponentInChildren<Camera>();
             m_OriginalCameraPosition = m_Camera.transform.localPosition;
             m_FovKick.Setup(m_Camera);
             m_HeadBob.Setup(m_Camera, m_StepInterval);
@@ -203,8 +207,9 @@ namespace Game.Characters
         private void GetInput(out float speed)
         {
             // Read input
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
+            Vector2 input = syncInput.getMovementInput();
+            float horizontal = input.x;
+            float vertical = input.y;
 
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.

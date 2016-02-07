@@ -9,49 +9,59 @@ public class PlayerSyncPosition : NetworkBehaviour
     [SyncVar(hook = "syncPositionValues")]
     private Vector3 syncPos;
 
-    [SerializeField]
-    Transform myTransform;
+    //[SyncVar(hook = "syncRotationalValues")]
+    //private Quaternion rotation;
 
-        
     private float lerpRate;
-    private float normalLerpRate = 15;
-    //private float FasterLerpRate = 20;
+   
+    private Vector2 lastInputSent = Vector2.zero;
+    private Vector2 lastInputRecieved = Vector2.zero;
+    private Vector2 interploatedInput = Vector2.zero;
 
-    private Vector3 lastPos = Vector3.zero;
-    private float threshold = 0.5f;
+    private Transform playerTransform;
 
-    private List<Vector3> syncPosList = new List<Vector3>();
 
-    //private float closeEnough = 0.1f;
+    public Vector2 getMovementInput()
+    {
+        return interploatedInput;
+    }
 
     public void Start()
     {
-        lerpRate = normalLerpRate;
+        lerpRate = 15;
+        playerTransform = GetComponent<Transform>();
     }
 
     void FixedUpdate()
     {
-        trasmitPosition();
+        if (isServer)
+        {
+            syncPos = playerTransform.position;
+        }
     }
 
     void Update()
     {
-        if (!isLocalPlayer)
+        if (isServer)
         {
+            lerpInput();            
+        }
+        
+        if(isLocalPlayer)
+        {
+            transmitInput();
             lerpTransform();
         }
     }
 
-    [Client]
-    private void syncPositionValues(Vector3 latestestPos)
+    private void lerpInput()
     {
-        syncPos = latestestPos;
-        syncPosList.Add(latestestPos);
+        interploatedInput = lastInputRecieved;// Vector2.Lerp(interploatedInput, lastInputRecieved, Time.deltaTime * lerpRate);
     }
 
     private void lerpTransform()
     {
-        myTransform.position = Vector3.Lerp(myTransform.position, syncPos, Time.deltaTime * lerpRate);
+        playerTransform.position = Vector3.Lerp(playerTransform.position, syncPos, Time.deltaTime * lerpRate);
 
         //if (syncPosList.Count == 0)
         //    return;
@@ -76,19 +86,44 @@ public class PlayerSyncPosition : NetworkBehaviour
     }
 
 
+   // [Command]
+    //void CmdProvidePositionToServer(Vector3 pos)
+    //{
+    //    syncPos = pos;
+    //}
+
+    //[ClientCallback]
+    //void trasmitPosition()
+    //{
+    //    if (isLocalPlayer && Vector3.Distance(myTransform.position, lastPos) > threshold)
+    //    {
+    //        CmdProvidePositionToServer(myTransform.position);
+    //        lastPos = myTransform.position;
+    //    }
+    //}
+
     [Command]
-    void CmdProvidePositionToServer(Vector3 pos)
+    void CmdProvideInputToServer(Vector2 latestInput)
     {
-        syncPos = pos;
+        lastInputRecieved = latestInput;
+        Debug.Log("CmdProvideInputToServer got new input = " + latestInput);
+    }
+
+    [Client]
+    private void syncPositionValues(Vector3 latestInput)
+    {
+        syncPos = latestInput;
     }
 
     [ClientCallback]
-    void trasmitPosition()
+    void transmitInput()
     {
-        if (isLocalPlayer && Vector3.Distance(myTransform.position, lastPos) > threshold)
-        {
-            CmdProvidePositionToServer(myTransform.position);
-            lastPos = myTransform.position;
+        Vector2 inputVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+        if (isLocalPlayer && !inputVector.Equals(lastInputSent))
+        {        
+            CmdProvideInputToServer(inputVector);
+            lastInputSent = inputVector;
         }
     }
 }

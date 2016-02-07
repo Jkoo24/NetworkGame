@@ -9,9 +9,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
     {
 	    if(isLocalPlayer)
         {
-            GetComponent<Game.Characters.FirstPersonController>().enabled = true;
             GetComponentInChildren<Camera>().enabled = true;
             GetComponentInChildren<AudioListener>().enabled = true;
+        }
+
+        if(isServer)
+        {
+            GetComponent<Game.Characters.FirstPersonController>().enabled = true;
         }
 	}
 

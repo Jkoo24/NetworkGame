@@ -15,14 +15,14 @@ public class PlayerSyncPosition : NetworkBehaviour
         
     private float lerpRate;
     private float normalLerpRate = 15;
-    private float FasterLerpRate = 20;
+    //private float FasterLerpRate = 20;
 
     private Vector3 lastPos = Vector3.zero;
     private float threshold = 0.5f;
 
     private List<Vector3> syncPosList = new List<Vector3>();
 
-    private float closeEnough = 0.1f;
+    //private float closeEnough = 0.1f;
 
     public void Start()
     {
@@ -36,14 +36,9 @@ public class PlayerSyncPosition : NetworkBehaviour
 
     void Update()
     {
-        LerpPosition();
-    }
-
-    void LerpPosition()
-    {
-        if(!isLocalPlayer)
+        if (!isLocalPlayer)
         {
-                historicalLerping();          
+            lerpTransform();
         }
     }
 
@@ -54,33 +49,30 @@ public class PlayerSyncPosition : NetworkBehaviour
         syncPosList.Add(latestestPos);
     }
 
-    private void ordinaryLerping()
+    private void lerpTransform()
     {
         myTransform.position = Vector3.Lerp(myTransform.position, syncPos, Time.deltaTime * lerpRate);
-    }
 
-    private void historicalLerping()
-    {
-        if (syncPosList.Count == 0)
-            return;
+        //if (syncPosList.Count == 0)
+        //    return;
 
-        myTransform.position = Vector3.Lerp(myTransform.position, syncPosList[0], Time.deltaTime * lerpRate);
+        //myTransform.position = Vector3.Lerp(myTransform.position, syncPosList[0], Time.deltaTime * lerpRate);
 
-        if (Vector3.Distance(myTransform.position, syncPosList[0]) < closeEnough)
-        {
-            syncPosList.RemoveAt(0);
-        }
+        //if (Vector3.Distance(myTransform.position, syncPosList[0]) < closeEnough)
+        //{
+        //    syncPosList.RemoveAt(0);
+        //}
 
-        if(syncPosList.Count > 10)
-        {
-            lerpRate = FasterLerpRate;
-        }
-        else
-        {
-            lerpRate = normalLerpRate;
-        }
+        //if(syncPosList.Count > 10)
+        //{
+        //    lerpRate = FasterLerpRate;
+        //}
+        //else
+        //{
+        //    lerpRate = normalLerpRate;
+        //}
 
-        Debug.Log("pos list count = " + syncPosList.Count);
+        //Debug.Log("pos list count = " + syncPosList.Count);
     }
 
 

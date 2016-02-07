@@ -14,6 +14,7 @@ public class PlayerSyncPosition : NetworkBehaviour
 
     private float lerpRate;
    
+
     private Vector2 lastInputSent = Vector2.zero;
     private Vector2 lastInputRecieved = Vector2.zero;
     private Vector2 interploatedInput = Vector2.zero;

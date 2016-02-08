@@ -8,24 +8,8 @@ public class PlayerSyncPosition : NetworkBehaviour
 {
     [SyncVar(hook = "syncPositionValues")]
     private Vector3 syncPos;
-
-    //[SyncVar(hook = "syncRotationalValues")]
-    //private Quaternion rotation;
-
     private float lerpRate;
-   
-
-    private Vector2 lastInputSent = Vector2.zero;
-    private Vector2 lastInputRecieved = Vector2.zero;
-    private Vector2 interploatedInput = Vector2.zero;
-
     private Transform playerTransform;
-
-
-    public Vector2 getMovementInput()
-    {
-        return interploatedInput;
-    }
 
     public void Start()
     {
@@ -42,22 +26,11 @@ public class PlayerSyncPosition : NetworkBehaviour
     }
 
     void Update()
-    {
-        if (isServer)
-        {
-            lerpInput();            
-        }
-        
+    {       
         if(isLocalPlayer)
         {
-            transmitInput();
             lerpTransform();
         }
-    }
-
-    private void lerpInput()
-    {
-        interploatedInput = lastInputRecieved;// Vector2.Lerp(interploatedInput, lastInputRecieved, Time.deltaTime * lerpRate);
     }
 
     private void lerpTransform()
@@ -86,45 +59,9 @@ public class PlayerSyncPosition : NetworkBehaviour
         //Debug.Log("pos list count = " + syncPosList.Count);
     }
 
-
-   // [Command]
-    //void CmdProvidePositionToServer(Vector3 pos)
-    //{
-    //    syncPos = pos;
-    //}
-
-    //[ClientCallback]
-    //void trasmitPosition()
-    //{
-    //    if (isLocalPlayer && Vector3.Distance(myTransform.position, lastPos) > threshold)
-    //    {
-    //        CmdProvidePositionToServer(myTransform.position);
-    //        lastPos = myTransform.position;
-    //    }
-    //}
-
-    [Command]
-    void CmdProvideInputToServer(Vector2 latestInput)
-    {
-        lastInputRecieved = latestInput;
-        Debug.Log("CmdProvideInputToServer got new input = " + latestInput);
-    }
-
     [Client]
     private void syncPositionValues(Vector3 latestInput)
     {
         syncPos = latestInput;
-    }
-
-    [ClientCallback]
-    void transmitInput()
-    {
-        Vector2 inputVector = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
-        if (isLocalPlayer && !inputVector.Equals(lastInputSent))
-        {        
-            CmdProvideInputToServer(inputVector);
-            lastInputSent = inputVector;
-        }
     }
 }

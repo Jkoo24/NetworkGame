@@ -6,6 +6,7 @@ using Random = UnityEngine.Random;
 namespace Game.Characters
 {
     [RequireComponent(typeof (PlayerSyncPosition))]
+    [RequireComponent(typeof (PlayerSyncInput))]
     [RequireComponent(typeof (CharacterController))]
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
@@ -34,7 +35,7 @@ namespace Game.Characters
         private float m_YRotation;
         private Vector2 m_Input;
         private Vector3 m_MoveDir = Vector3.zero;
-        private PlayerSyncPosition syncInput;
+        private PlayerSyncInput syncInput;
         private CharacterController m_CharacterController;
         private CollisionFlags m_CollisionFlags;
         private bool m_PreviouslyGrounded;
@@ -47,7 +48,7 @@ namespace Game.Characters
         // Use this for initialization
         private void Start()
         {
-            syncInput = GetComponent<PlayerSyncPosition>();
+            syncInput = GetComponent<PlayerSyncInput>();
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = GetComponentInChildren<Camera>();
             m_OriginalCameraPosition = m_Camera.transform.localPosition;

@@ -50,6 +50,7 @@
      <Compile Include="Assets\Scripts\Networking\NetworkObject.cs" />
      <Compile Include="Assets\Scripts\Networking\NetworkPlayer.cs" />
      <Compile Include="Assets\Scripts\Networking\PlayerNetworkSetup.cs" />
+     <Compile Include="Assets\Scripts\Networking\PlayerSyncInput.cs" />
      <Compile Include="Assets\Scripts\Networking\PlayerSyncPosition.cs" />
      <Compile Include="Assets\Scripts\Player\CursorLocker.cs" />
      <Compile Include="Assets\Scripts\Player\FirstPersonController.cs" />

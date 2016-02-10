@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace Game.Characters
 {
-    [RequireComponent(typeof (PlayerSyncPosition))]
+    [RequireComponent(typeof (PlayerSyncState))]
     [RequireComponent(typeof (PlayerSyncInput))]
     [RequireComponent(typeof (CharacterController))]
     [RequireComponent(typeof (AudioSource))]
@@ -19,7 +19,6 @@ namespace Game.Characters
         [SerializeField] private float m_JumpSpeed;
         [SerializeField] private float m_StickToGroundForce;
         [SerializeField] private float m_GravityMultiplier;
-        [SerializeField] private MouseLook m_MouseLook;
         [SerializeField] private bool m_UseFovKick;
         [SerializeField] private FOVKick m_FovKick = new FOVKick();
         [SerializeField] private bool m_UseHeadBob;
@@ -34,6 +33,7 @@ namespace Game.Characters
         private bool m_Jump;
         private float m_YRotation;
         private Vector2 m_Input;
+        private Quaternion m_rot = Quaternion.identity;
         private Vector3 m_MoveDir = Vector3.zero;
         private PlayerSyncInput syncInput;
         private CharacterController m_CharacterController;
@@ -58,14 +58,12 @@ namespace Game.Characters
             m_NextStep = m_StepCycle/2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-			m_MouseLook.Init(transform , m_Camera.transform);
         }
 
 
         // Update is called once per frame
         private void Update()
         {
-            RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
@@ -100,6 +98,9 @@ namespace Game.Characters
         {
             float speed;
             GetInput(out speed);
+
+            //set our body rotation
+            transform.localRotation = m_rot;
 
             // always move along the camera forward as it is the direction that it being aimed at
             Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
@@ -208,9 +209,10 @@ namespace Game.Characters
         private void GetInput(out float speed)
         {
             // Read input
-            Vector2 input = syncInput.getMovementInput();
-            float horizontal = input.x;
-            float vertical = input.y;
+            Vector2 moveInput = syncInput.getMovementInput();
+            Quaternion rotInput = syncInput.getRotation();
+            float horizontal = moveInput.x;
+            float vertical = moveInput.y;
 
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
@@ -220,6 +222,7 @@ namespace Game.Characters
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
             m_Input = new Vector2(horizontal, vertical);
+            m_rot = rotInput;
 
             // normalize input if it exceeds 1 in combined length:
             if (m_Input.sqrMagnitude > 1)
@@ -227,13 +230,6 @@ namespace Game.Characters
                 m_Input.Normalize();
             }
         }
-
-
-        private void RotateView()
-        {
-            m_MouseLook.LookRotation (transform, m_Camera.transform);
-        }
-
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {

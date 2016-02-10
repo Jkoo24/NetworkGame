@@ -4,17 +4,23 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 
 [NetworkSettings(channel = 0, sendInterval = 0.1f)]
-public class PlayerSyncPosition : NetworkBehaviour
+public class PlayerSyncState : NetworkBehaviour
 {
     [SyncVar(hook = "syncPositionValues")]
     private Vector3 syncPos;
+
+    [SyncVar(hook = "syncRotationValues")]
+    private Quaternion syncRot;
+
     private float lerpRate;
     private Transform playerTransform;
+    private PlayerSyncInput playerInput;
 
     public void Start()
     {
         lerpRate = 15;
         playerTransform = GetComponent<Transform>();
+        playerInput = GetComponent<PlayerSyncInput>();
     }
 
     void FixedUpdate()
@@ -22,6 +28,7 @@ public class PlayerSyncPosition : NetworkBehaviour
         if (isServer)
         {
             syncPos = playerTransform.position;
+            syncRot = playerTransform.localRotation;
         }
     }
 
@@ -36,6 +43,7 @@ public class PlayerSyncPosition : NetworkBehaviour
     private void lerpTransform()
     {
         playerTransform.position = Vector3.Lerp(playerTransform.position, syncPos, Time.deltaTime * lerpRate);
+        playerTransform.localRotation = Quaternion.Slerp(playerTransform.localRotation, syncRot, Time.deltaTime * lerpRate);
 
         //if (syncPosList.Count == 0)
         //    return;
@@ -63,5 +71,11 @@ public class PlayerSyncPosition : NetworkBehaviour
     private void syncPositionValues(Vector3 latestInput)
     {
         syncPos = latestInput;
+    }
+
+    [Client]
+    private void syncRotationValues(Quaternion latestRot)
+    {
+        syncRot = latestRot;
     }
 }

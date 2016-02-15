@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 
-[NetworkSettings(channel = 0, sendInterval = 0.1f)]
+[NetworkSettings(channel = 0, sendInterval = 0.05f)]
 public class PlayerSyncInput : NetworkBehaviour
 {
     public Transform headTransform;
@@ -91,7 +91,6 @@ public class PlayerSyncInput : NetworkBehaviour
 
         if (m_cursorIsLocked)
         {
-            float yRot = Input.GetAxis("Mouse X") * XSensitivity;
             float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
 
             headTransform.localRotation *= Quaternion.Euler(-xRot, 0f, 0f);

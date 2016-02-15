@@ -15,7 +15,7 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if(isServer)
         {
-            GetComponent<Game.Characters.FirstPersonController>().enabled = true;
+            //GetComponent<Game.Characters.FirstPersonController>().enabled = true;
         }
 	}
 
